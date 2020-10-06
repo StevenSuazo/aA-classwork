@@ -1,0 +1,341 @@
+ PARTNER_A
+## Question One: Employees Query
+
+You are given a PostgreSQL database with two tables: the first is an `employees`
+table and the second is a `departments` table. Employees can belong to a single
+department.
+
+1.  Write a SQL query that, given a department name, finds all the employees
+    `name`s that are in that department.
+
+2.  Next find the name of the employees that don't belong to any department
+
+
+1. select name 
+from employees 
+join departments on department_id = departments.id 
+where departments.name = 'name' 
+group by (employees.name) 
+
+2. select name 
+from Employees
+where department_id NOT IN (
+            select departmens.id
+            from departments 
+)
+
+<!-- #### Solution
+--  1.
+SELECT
+  employees.name
+FROM
+  employees
+JOIN
+  departments ON employees.department_id = departments.id
+WHERE
+  departments.name = ?
+
+
+--  2.
+SELECT
+  employees.name
+FROM
+  employees
+WHERE
+  employees.department_id IS NULL; -->
+____________________________________________________________________________________
+PARTNER_B
+## Question One: What are the disadvantages of adding an index to a table column in a database?
+
+Adding index to column in a table can be an overused tool when creating a table. When properly used,
+having an index for a column would shorten the loop up time for said column. 
+On the other hand if one were to add indexes to all of the columns, 
+it would be very expesive, in terms of space and over time look up when creating and editing tables.
+
+
+<!-- Answer: 
+Indices do have a cost. They make writes (INSERTs, DELETEs, and UPDATEs) 
+a little more taxing because the index table must also be updated. -->
+
+____________________________________________________________________________________
+PARTNER_A
+## Question Two:
+
+Describe the differences between a primary key and a foreign key.
+
+Primary key will alwasy be written as :id, and it represents the column at the table/class we are at. 
+Foreign key is the id of a different table, column that we use it to associate with the current table. 
+
+<!-- **Answer**: 
+A primary key uniquely identifies a record in the relational
+database table, whereas a foreign key refers to the `id` column which is the
+primary key of **another** table. -->
+
+____________________________________________________________________________________
+PARTNER_B
+
+## Question Two:
+***Given the following table write all the belongs_to and has_many associations for models 
+based on the below table (User, Enrollment, and Course)
+
+<!-- == Schema Information
+
+Table name: users
+
+  id   :integer                not null, primary key
+  name :string                 not null
+
+
+Table name: enrollments
+
+  id   :integer                not null, primary key
+  course_id :integer           not null
+  student_id :integer          not null
+
+
+Table name: courses
+
+  id   :integer                not null, primary key
+  course_name :string          not null
+  professor_id :integer        not null
+  prereq_course_id :integer    not null -->
+
+class User < ApplicationRecord
+  has_many :enrollments,
+    foreign_key: :student_id,
+    class_name: :Enrollment
+
+  has_many :courses,
+    foreign_key: :professor_id,
+    class_name: :Course
+end 
+
+class Enrollment < ApplicationRecord
+  belongs_to :course,
+    foreign_key: :course_id,
+    class_name: :Course
+
+  belongs_to :student,
+    foreign_key: :student_id,
+    class_name: :User
+end
+
+class Course < ApplicationRecord
+  belongs_to :professor,
+    foreign_key: :professor_id,
+    class_name: :User
+
+  belongs_to :prereq,
+    foreign_key: :prereq_course_id,
+    class_name: :Course
+
+  has_many :enrollments,
+    foreign_key: :course_id,
+    class_name: :Enrollment
+end
+
+<!-- Answer:
+class Enrollment < ApplicationRecord
+  belongs_to :user,
+    class_name: 'User',
+    foreign_key: :student_id,
+    primary_key: :id
+
+  belongs_to :course,
+    class_name: 'Course',
+    foreign_key: :course_id,
+    primary_key: :id
+end
+
+class User < ApplicationRecord
+  has_many :enrollments,
+    class_name: 'Enrollment',
+    foreign_key: :student_id,
+    primary_key: :id
+
+  has_many :courses_taught,
+    class_name: 'Course',
+    foreign_key: :professor_id,
+    primary_key: :id,
+    optional: true
+end
+
+class Course < ApplicationRecord
+  has_many :enrollments,
+    class_name: 'Enrollment',
+    foreign_key: :course_id,
+    primary_key: :id
+
+  belongs_to :prerequisite,
+    class_name: 'Course',
+    foreign_key: :prereq_course_id,
+    primary_key: :id,
+    optional: true
+
+  belongs_to :professor,
+    class_name: 'User',
+    foreign_key: :professor_id,
+    primary_key: :id
+end -->
+
+____________________________________________________________________________________
+PARTNER_A
+## Question Three
+
+Given the following table write all the `belongs_to` and `has_many` **and**
+`has_many through` associations for models based on the below table
+(`Physician`, `Appointment`, and `Patient`)
+
+
+<!-- == Schema Information
+Table name: physicians
+
+ id   :integer          not null, primary key
+ name :string           not null
+
+
+Table name: appointments
+
+ id   :integer           not null, primary key
+ physician_id :integer   not null
+ patient_id :integer     not null
+
+
+Table name: patients
+
+ id   :integer           not null, primary key
+ name :string            not null
+ primary_physician_id :integer -->
+
+
+class Physician < ApplicationRecord 
+    has_many :appointments,
+    class_name: :Appointment,
+    foreign_key: :physician_id,
+    primary_key: :id 
+
+    has_many :patients,
+    through: :appointments,
+    source: :patient
+end 
+
+
+class Appointment 
+    belongs_to :physician,
+    class_name: :Physician,
+    foreign_key: :physician_id,
+    primary_key: :id 
+
+
+    belongs_to :patient,
+    class_name: Patient,
+    foreign_key: :patient_id,
+    primary_key: :id
+
+end 
+
+
+class Patient 
+    has_many :appointments,
+    class_name: :Appointment,
+    foreign_key: :patient_id,
+    primary_key: :id
+
+
+    belongs_to :primary_physician,
+    class_name: :Physician
+    foreign_key: :primary_physician_id,
+    primary_key: :id 
+end 
+
+
+<!-- #### Solution:
+class Physician < ApplicationRecord
+  has_many :appointments,
+    class_name: 'Appointment',
+    foreign_key: :physician_id,
+    primary_key: :id
+
+  has_many :primary_patients,
+    class_name: 'Patient',
+    foreign_key: :primary_physician_id,
+    primary_key: :id
+
+  has_many :general_patients,
+    through: :appointments,
+    source: :patient
+
+  has_many :primary_patient_appointments,
+    through: :primary_patients,
+    source: :appointments
+
+end
+
+class Appointment < ApplicationRecord
+  belongs_to :physician,
+    class_name: 'Physician',
+    foreign_key: :physician_id,
+    primary_key: :id
+
+  belongs_to :patient,
+    class_name: 'Patient',
+    foreign_key: :patient_id,
+    primary_key: :id
+end
+
+class Patient < ApplicationRecord
+  has_many :appointments
+    class_name: 'Appointment',
+    foreign_key: :patient_id,
+    primary_key: :id
+
+  belongs_to :primary_care_physician
+    class_name: 'Physician',
+    foreign_key: :primary_physician_id,
+    primary_key: :id
+end -->
+
+
+_________________________________________________________________________________
+PARTNER_B
+
+## Questions Three: 
+Given all possible SQL commands order by order of query execution.
+(SELECT, DISTINCT, FROM, JOIN, WHERE, GROUP BY, HAVING, LIMIT/OFFSET, ORDER)
+
+1. FROM
+2. JOIN
+3. WHERE
+4. SELECT
+5. DISTINCT
+6. GROUP BY <!--SELECT
+7. HAVING <!--DISTINCT
+8. ORDER
+9. LIMIT/ OFFSET
+
+Answer:
+
+1. FROM and JOINs
+2. WHERE
+3. GROUP BY
+4. HAVING
+5. SELECT
+6. DISTINCT
+7. ORDER BY
+8. LIMIT / OFFSET
+
+____________________________________________________________________________________
+PARTNER_A
+
+## Question Four:
+1. Paraphrase the advantages of using an ORM (like ActiveRecord).
+
+For example ActiveRecord, it helps us write ruby code rather than raw SQL code. 
+It has many prewritten commands that we can use. Also, when we use ActiveRecord it first makes and 
+Relation object which we can save it to variable and use it again and agian isntead of going to 
+the database over and over again. 
+
+<!-- **Answer**: Using an ORM (Object Relational Model) allows you to interact with
+database information in an OOP way. An ORM like ActiveRecord will translate rows
+from your SQL tables into Ruby objects on fetch, and translates your Ruby
+objects back to rows on save resulting in less overall database access code. -->
