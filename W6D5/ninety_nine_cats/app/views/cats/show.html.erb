@@ -1,0 +1,34 @@
+<html>
+<head>
+<style>
+
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+</head>
+<body>
+
+<h1><% @cat.name %> </h1>
+
+<table>
+  <tr>
+    <th style="height:100px"> Cat Birthday </th>
+    <th style="height:100px"> Cat Sex </th>
+    <th style="height:100px"> Cat Color </th>
+    <th style="height:100px"> Cat Description </th>
+  </tr>
+  <tr>
+    <td><%= @cat.birth_date %></td>
+    <td><%= @cat.sex %></td>
+    <td><%= @cat.color %></td>
+    <td><%= @cat.description %></td>
+    
+  </tr>
+  <tr>
+    <td> other birth info </td>
+    <td> sex change maybe? </td>
+    <td> I wanted to be white  </td>
+    <td> fluffy and playful </td>
+  </tr>
+</table>

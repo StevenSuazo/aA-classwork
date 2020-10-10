@@ -1,0 +1,22 @@
+
+<form action= "/cats" method= "post">
+  
+  <label>Name
+    <input type="text" name="cat[name]" value="<%= cat.name %>">
+  </label>
+  <br>
+  <label>Sex
+    <input type="radio" name="cat[sex]" value="M" <%= cat.sex == "M" ? "checked" : "" %> > Male
+    <input type="radio" name="cat[sex]" value="F" <%= cat.sex == "F" ? "checked" : "" %>> Female
+  </label>
+  <br>
+  <label>Birth Date
+    <input type="date" name="cat[birth_date]" value="<%= cat.birth_date %>">
+  </label>
+  <br>
+    <label>Color
+    <select name="cat[color]">
+     <option <%= type == :edit ? "disabled" : "selected" %>>--Choose a Color--</option>
+
+    </select>
+     </label>
